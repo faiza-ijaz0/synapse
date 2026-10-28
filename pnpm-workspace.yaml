@@ -1,0 +1,17 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Supply-chain hardening (threat model T13): don't install versions published
+# in the last 3 days.
+minimumReleaseAge: 4320
+
+# Dependency lifecycle scripts are blocked unless listed here.
+# prisma: preinstall only checks the Node version. @prisma/engines: postinstall
+# downloads the schema engine, which the Prisma CLI also fetches on first use.
+allowBuilds:
+  prisma: false
+  '@prisma/engines': false
+  # esbuild (via tsx): postinstall only validates the binary that pnpm already
+  # installs from the @esbuild/<platform> optional dependency.
+  esbuild: false

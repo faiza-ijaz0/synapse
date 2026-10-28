@@ -1,0 +1,38 @@
+{
+  "name": "synapse",
+  "private": true,
+  "description": "Local-first Engineering Intelligence Platform",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r --filter=!synapse run typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "pnpm --parallel --filter @synapse/api --filter @synapse/worker dev",
+    "db:generate": "pnpm --filter @synapse/db generate",
+    "db:migrate:dev": "pnpm --filter @synapse/db migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @synapse/db migrate:deploy",
+    "db:status": "pnpm --filter @synapse/db migrate:status",
+    "postinstall": "pnpm --filter @synapse/db generate"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@synapse/config": "workspace:*",
+    "@synapse/db": "workspace:*",
+    "@types/node": "24.19.2",
+    "eslint": "10.13.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "5.0.5"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@synapse/worker",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@synapse/config": "workspace:*",
+    "@synapse/db": "workspace:*",
+    "@synapse/logger": "workspace:*",
+    "@synapse/queue": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  }
+}

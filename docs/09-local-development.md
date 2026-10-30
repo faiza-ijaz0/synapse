@@ -108,7 +108,9 @@ pnpm typecheck; pnpm lint; pnpm test
 ```
 
 `pnpm test` runs unit tests always. Integration tests run only when
-`DATABASE_URL_TEST` is set, and are **reported as skipped** otherwise.
+`DATABASE_URL_TEST` is set, and are **reported as skipped** otherwise. To
+check that none were skipped, as CI does, run
+`$env:SYNAPSE_REQUIRE_INTEGRATION_TESTS='1'; pnpm test`.
 
 ## 6. Run
 

@@ -33,3 +33,9 @@ and always check that the output file is non-empty.
 `assertTestDatabaseUrl` and `truncateAll` refuse to touch any database whose
 name doesn't end in `_test`. `truncateAll` re-checks the name server-side with
 `current_database()` before truncating.
+
+`resolveTestDatabaseUrl` (used by the Vitest global setup) adds the CI
+requirement: with `SYNAPSE_REQUIRE_INTEGRATION_TESTS=1`, a missing
+`DATABASE_URL_TEST` is an error rather than a skip. `findUnexecutedIntegrationTests`
+(used by `vitest.integration-guard.ts`) fails the run if any `*.int.test.ts`
+test didn't run and pass.

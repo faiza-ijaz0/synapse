@@ -62,8 +62,13 @@ Each case must be **denied** unless the origin is allowlisted:
 - `ubuntu-latest`: install with a frozen lockfile, typecheck, lint, unit,
   component, integration (a Postgres 17 service container), build,
   and E2E (Playwright browsers cached).
+- The ubuntu job sets `SYNAPSE_REQUIRE_INTEGRATION_TESTS=1`. `pnpm test` then
+  fails if `DATABASE_URL_TEST` is missing, or if any `*.int.test.ts` test is
+  skipped, pending, or didn't run (`vitest.integration-guard.ts`), so a green
+  job proves the integration tests executed.
 - `windows-latest`: typecheck, unit, and component tests. This guards against
-  Windows path and line-ending issues.
+  Windows path and line-ending issues. It has no Postgres, so it sets
+  `SYNAPSE_REQUIRE_INTEGRATION_TESTS=0` and integration tests skip by design.
 - `pnpm audit --prod` and a license allowlist check.
 - No secrets are required. CI generates throwaway values.
 

@@ -26,6 +26,9 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL_TEST: postgresql://synapse:synapse@127.0.0.1:5432/synapse_test
+      # Postgres is provided here, so integration tests must run: a missing
+      # DATABASE_URL_TEST or any skipped *.int.test.ts test fails `pnpm test`.
+      SYNAPSE_REQUIRE_INTEGRATION_TESTS: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -44,6 +47,10 @@ jobs:
   windows:
     name: typecheck + unit tests (windows)
     runs-on: windows-latest
+    env:
+      # Intentionally database-free: no Postgres service on this runner, so
+      # integration tests are skipped here. The ubuntu job requires them.
+      SYNAPSE_REQUIRE_INTEGRATION_TESTS: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -53,5 +60,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
-      # No database here: integration tests report as skipped.
+      # Integration tests report as skipped (see the job env above).
       - run: pnpm test

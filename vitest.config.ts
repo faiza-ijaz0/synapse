@@ -8,6 +8,8 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     // Applies committed migrations to the _test database (when configured).
     globalSetup: ['./vitest.global-setup.ts'],
+    // Fails the run if integration tests are required but any were skipped.
+    reporters: ['default', './vitest.integration-guard.ts'],
     // Integration tests share one test database, so files run one at a time.
     fileParallelism: false,
     testTimeout: 20_000,

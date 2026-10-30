@@ -1,6 +1,6 @@
 # ADR-0014: Browser origin and CSRF strategy
 
-Status: **Accepted** · 2026-10-30 · Refines [ADR-0009](0009-local-auth.md) and [ADR-0005](0005-spa-frontend.md)
+Status: **Accepted** · 2026-10-30 · Amended 2026-10-30 (M1, see below) · Refines [ADR-0009](0009-local-auth.md) and [ADR-0005](0005-spa-frontend.md)
 
 ## Context
 
@@ -30,9 +30,10 @@ dev servers. The `Origin` header does include the port.
    `SYNAPSE_API_PORT` in `.env`. The code default stays `4000`.
 2. **Default web origin.** `SYNAPSE_WEB_ORIGIN` defaults to the API's own
    origin, `http://127.0.0.1:<SYNAPSE_API_PORT>`, derived from the port. An
-   explicit value must be an exact loopback origin (`127.0.0.1`, `localhost`,
-   or `[::1]`) with a port and no path. Wildcards are rejected. SYNAPSE never
-   trusts another application's origin, including `localhost:5173`.
+   explicit value must be an exact loopback origin (`127.0.0.1` or `[::1]`;
+   `localhost` is rejected, see the amendment) with a port and no path.
+   Wildcards are rejected. SYNAPSE never trusts another application's origin,
+   including `localhost:5173`.
 3. **Phase 5 frontend.** In development, the Vite dev server runs on its own
    pinned port on `127.0.0.1` (`strictPort`) and proxies `/api`, and
    `SYNAPSE_WEB_ORIGIN` is set to that origin. In production mode, the API
@@ -62,10 +63,24 @@ dev servers. The `Origin` header does include the port.
   development and production modes.
 - \+ No CSRF token state to store or rotate.
 - − Opening SYNAPSE at `http://localhost:<port>` still passes the `Host` check,
-  but cookie-authenticated writes from that origin fail the `Origin` check
-  unless `SYNAPSE_WEB_ORIGIN` names it. The documented address is `127.0.0.1`.
+  but cookie-authenticated writes from that origin always fail the `Origin`
+  check, because `SYNAPSE_WEB_ORIGIN` can't name a `localhost` origin. The
+  documented address is `127.0.0.1`.
 - − Other applications served from `127.0.0.1` on other ports are still the
   same site. The exact `Origin` check is what stops them.
+
+## Amendment — 2026-10-30 (M1)
+
+Owner decisions R1 and R2, approved during the M1 configuration review:
+
+- **R1.** `SYNAPSE_WEB_ORIGIN` accepts only `127.0.0.1` and `[::1]`. `localhost`
+  is rejected: a `localhost` origin shares its cookie jar and site with every
+  other `localhost` app, and rejecting it turns the old template value
+  (`http://localhost:5173`) into a startup error instead of silent trust.
+- **R2.** `SYNAPSE_API_HOST` must be exactly `127.0.0.1`, so the derived default
+  origin always matches the address the API binds to.
+
+The validation rules are listed in doc 07.
 
 ## Alternatives
 

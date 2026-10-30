@@ -10,6 +10,7 @@ import { checkDatabase, checkQueueSchema, createPrismaClient } from '@synapse/db
 import { createLogger } from '@synapse/logger';
 import { createApp } from './app.js';
 import { buildAllowedHosts } from './middleware/guards.js';
+import { describeListenError } from './startup.js';
 
 function loadEnv(): ApiEnv {
   loadDotEnv();
@@ -41,11 +42,19 @@ const app = createApp({
   },
 });
 
-const server = app.listen(env.SYNAPSE_API_PORT, env.SYNAPSE_API_HOST, () => {
+// Express 5 passes listen errors (e.g. EADDRINUSE) to this callback.
+const server = app.listen(env.SYNAPSE_API_PORT, env.SYNAPSE_API_HOST, (error?: Error) => {
+  if (error !== undefined) {
+    const message = describeListenError(error, env.SYNAPSE_API_HOST, env.SYNAPSE_API_PORT);
+    if (message === undefined) throw error;
+    process.stderr.write(`${message}\n`);
+    process.exit(1);
+  }
   logger.info(
     {
       host: env.SYNAPSE_API_HOST,
       port: env.SYNAPSE_API_PORT,
+      webOrigin: env.SYNAPSE_WEB_ORIGIN,
       database: redactConnectionUrl(env.DATABASE_URL),
     },
     'api listening',

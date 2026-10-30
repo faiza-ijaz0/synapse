@@ -44,7 +44,7 @@ CASCADE`) using a helper in `packages/db/testing`.
 - Hard gate: `packages/net-guard`, `packages/config` redaction, and the auth
   module must stay at ≥ 90% branch coverage. These are the security boundary.
 
-## 5. SSRF corpus (Phase 3 exit criterion)
+## 5. SSRF corpus (Phase 4 exit criterion)
 
 Each case must be **denied** unless the origin is allowlisted:
 `http://127.0.0.1`, `http://localhost`, `http://[::1]`, `http://0.0.0.0`,

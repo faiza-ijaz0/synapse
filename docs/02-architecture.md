@@ -1,6 +1,6 @@
 # 02 — Architecture
 
-Status: **Approved** 2026-10-28 · revised for Phase 2
+Status: **Approved** 2026-10-28 · revised for Phase 2 · revised 2026-10-30 for Phase 3a
 
 ## 1. Shape: modular monolith + worker
 
@@ -14,7 +14,7 @@ ADR-0012).
                  ┌──────────────────────── developer machine ────────────────────────┐
                  │                                                                     │
   Browser ──────►│  apps/web (Vite SPA, static)                                        │
-  (localhost)    │      │  fetch /api/* (cookie session, same-origin via proxy)        │
+  (127.0.0.1)    │      │  fetch /api/* (cookie session, same-origin via proxy)        │
                  │      ▼                                                              │
                  │  apps/api  (Express 5, 127.0.0.1:4000)                              │
                  │      │  Prisma ──────────────► PostgreSQL 17                        │
@@ -75,16 +75,22 @@ ADR-0012).
 
 ### 3.1 Authentication (single local user)
 
-- First-run setup creates one user. The password is hashed with
+- First-run setup creates one user and requires a one-time setup code that the
+  API prints to its console while no user exists. The password is hashed with
   `node:crypto.scrypt` (built-in, so no native addon is needed on Windows).
 - Browser: server-side session row plus an opaque cookie
   (`HttpOnly; SameSite=Strict; Path=/`, and `Secure` when served over HTTPS).
+  The row stores `HMAC-SHA256(SYNAPSE_SESSION_SECRET, session ID)`. A session
+  ends after 24 hours idle or 7 days after login.
 - CLI: **personal access tokens**. The random token is shown once and stored as
-  a SHA-256 hash. Its scope is limited to `ingest:*`, and it can be revoked
-  from the UI.
-- Localhost-specific defenses against drive-by attacks from other websites the
-  user visits: `Host` header allowlist (defeats DNS rebinding), `Origin` check on
-  state-changing methods, no wildcard CORS. See threat model T1.
+  a SHA-256 hash. Its scope is limited to `ingest`, it expires after 90 days by
+  default (365 at most), and it can be revoked.
+- Login and setup attempts are rate-limited in memory, with backoff.
+- Localhost-specific defenses against drive-by attacks from other websites and
+  other local dev servers: SYNAPSE is used at `http://127.0.0.1:<port>`, a
+  `Host` header allowlist (defeats DNS rebinding), an exact `Origin` match plus
+  a custom header on cookie-authenticated state-changing requests, and no CORS.
+  See ADR-0009 (amended 2026-10-30), ADR-0014, and threat model T1, T17, T18.
 
 ## 4. Database — PostgreSQL + Prisma
 
@@ -165,7 +171,7 @@ same policy, and launches Chromium with `--proxy-server=<proxy>`,
 additionally checks each request with `page.route`. The Chromium sandbox stays
 **on**.
 
-## 6. CLI — `apps/cli` (Phase 3)
+## 6. CLI — `apps/cli` (Phase 3b)
 
 A web page can't read arbitrary folders, and the API shouldn't read paths a
 browser sends it. So code analysis follows a **push model**:
@@ -209,8 +215,8 @@ synapse import-tests ./junit.xml --project my-app
 | `packages/db`                                                                       | Prisma schema, migrations, client factory, and test helpers.                                                               |
 | `packages/queue`                                                                    | pg-boss factory, queue names, and typed send/work helpers (payload schemas from `contracts`).                              |
 | `packages/net-guard`                                                                | URL validation, IP classification, pinned fetch, filtering proxy.                                                          |
-| `packages/analyzers`                                                                | Code-analysis engines shared by the CLI and worker (Phase 3).                                                              |
-| `packages/ai`                                                                       | Provider interface plus the Ollama adapter (Phase 8).                                                                      |
+| `packages/analyzers`                                                                | Code-analysis engines shared by the CLI and worker (Phase 3b).                                                             |
+| `packages/ai`                                                                       | Provider interface plus the Ollama adapter (Phase 9).                                                                      |
 | Shared compiler, lint, format, and test settings live at the repo root              |
 | (`tsconfig.base.json`, `eslint.config.js`, `.prettierrc.json`, `vitest.config.ts`)  |
 | rather than in separate config packages. That's the same effect with less ceremony. |

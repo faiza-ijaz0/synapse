@@ -16,17 +16,17 @@ synapse/
 │  │  └─ src/{app.ts,server.ts,middleware/,modules/<module>/{router,service,repository}.ts}
 │  ├─ worker/              [P2] pg-boss worker
 │  │  └─ src/{main.ts,jobs/<queue>.ts,sandbox/}
-│  └─ cli/                 [P3] `synapse` CLI
+│  └─ cli/                 [P3b] `synapse` CLI
 ├─ packages/
 │  ├─ config/              [P2] Zod-validated env loading
 │  ├─ logger/              [P2] pino factory + redaction
 │  ├─ contracts/           [P2] Zod schemas: DTOs, error codes, job payloads, ingest document
 │  ├─ db/                  [P2] Prisma schema, migrations, client, test helpers
 │  ├─ queue/               [P2] pg-boss factory + typed queue helpers
-│  ├─ analyzers/           [P3] code analysis engines (CLI + worker)
+│  ├─ analyzers/           [P3b] code analysis engines (CLI + worker)
 │  ├─ net-guard/           [P4] SSRF-safe fetch + filtering proxy
 │  └─ ai/                  [P9] optional explanation providers
-├─ fixtures/               [P3+] fixture servers, sites, projects, test reports
+├─ fixtures/               [P3b+] fixture servers, sites, projects, test reports
 ├─ e2e/                    [P5] Playwright end-to-end tests
 ├─ docs/
 │  ├─ 01-product-requirements.md … 09-local-development.md
